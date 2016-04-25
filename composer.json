@@ -1,0 +1,8 @@
+{
+  "name": "viancen/eazymatch-api",
+  "autoload": {
+    "psr-0": {
+      "Viancen\\EazymatchApi": "src"
+    }
+  }
+}
