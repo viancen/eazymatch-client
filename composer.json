@@ -2,6 +2,7 @@
   "name": "viancen/eazymatch-api",
   "type": "library",
   "version": "1.0",
+  "license": "MIT",
   "description": "API client library for the EazyMatch system",
   "keywords": [
     "recruitment",

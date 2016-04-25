@@ -45,7 +45,7 @@ class Connect
         // collect post variables for service
         $fields = array(
             // name of instance
-            'instance' => 'kobusbv',
+            'instance' => $this->instance,
 
             // key to use for session
             'key' => $apikey
