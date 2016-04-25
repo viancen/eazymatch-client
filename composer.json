@@ -1,6 +1,6 @@
 {
   "name": "viancen/eazymatch-api",
-  "version":"dev-master",
+  "version": "1.0",
   "autoload": {
     "psr-0": {
       "Viancen\\EazymatchApi": "src"
