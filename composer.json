@@ -1,6 +1,16 @@
 {
   "name": "viancen/eazymatch-api",
+  "type": "library",
   "version": "1.0",
+  "description": "API client library for the EazyMatch system",
+  "keywords": [
+    "recruitment",
+    "api"
+  ],
+  "homepage": "http://www.eazymatch-online.nl",
+  "require": {
+    "php": ">=5.5.0"
+  },
   "autoload": {
     "psr-0": {
       "Viancen\\EazymatchApi": "src"
