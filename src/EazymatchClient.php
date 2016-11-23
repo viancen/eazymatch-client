@@ -7,27 +7,15 @@ class EazymatchClient
 {
     //private client (Guzzle)
     private $client;
+    private $apiToken;
 
     //customer slug
-    public $customer;
+    protected $customer;
 
     //API key, get one at eazymatch-online.nl
-    public $apiKey;
-    public $apiSecret;
-
-    //What part of Eazymatch is used
-    public $settings = [];
-
-    //Root url of API
-    public $root;
-
-    //not used yet
-    public $debug = false;
-
-    //Todo: map all errors into comprehensible messages
-    public static $error_map = [
-        "Invalid_Key" => "Eazymatch_Invalid_Key",
-    ];
+    protected $apiKey;
+    protected $apiSecret;
+    protected $root;
 
     /**
      * EazymatchClient constructor.
@@ -38,177 +26,75 @@ class EazymatchClient
      * @param null $root
      * @param array $options
      */
-    public function __construct($apikey = '', $apiSecret = '', $customer = null, $root = null, $options = [])
+    public function __construct($apikey = '', $apiSecret = '', $customer = null, $root = null)
     {
         if (!$apikey) throw new Eazymatch_Error('You must provide a Eazymatch API key');
         if (!$apiSecret) throw new Eazymatch_Error('You must provide a Eazymatch API secret');
         if (!$customer) throw new Eazymatch_Error('You must provide a Eazymatch customer slug');
         if (!$root) {
-            $root = 'https://api.eazymatch.net/v1/';
+            $root = 'https://core.eazymatch.net/v1/';
         }
 
-        $this->apiKey = sha1($apikey . $apiSecret);
+        $this->apiKey = $apikey;
         $this->root = $root;
         $this->apiSecret = $apiSecret;
-        $this->customer = $customer;
-
-        if (!empty($options)) {
-            if (!empty($options['settings'])) {
-                $this->settings = $options['settings'];
-            }
-        }
-
+        $this->instance = $customer;
         $this->client = new Client();
-
         $this->root = rtrim($this->root, '/') . '/';
 
-    }
+        //setup connection
+        $this->resetKey();
 
-    public function getSettings()
-    {
-        return $this->settings;
     }
 
     /**
-     * @param null $email
-     * @param null $passWord
-     * @throws Eazymatch_Error
-     * @return array $sessionTokenToReplaceApiTokenWith
+     * when a token is returned we need to hash this and keep it for further calls
+     *
      */
-    public function loginUser($email = null, $passWord = null)
+    public function resetKey()
     {
-        if (!$email) throw new Eazymatch_Error('You must provide a emailaddress');
-        if (!$passWord) throw new Eazymatch_Error('You must provide a password');
+        $tempToken = $this->call('session/getToken');
+        $this->setToken($tempToken['result']);
+    }
 
-        $data = $this->post('users/login', [
-            'email' => $email,
-            'password' => $passWord
-        ]);
-
-        if (!empty($data['session'])) {
-            $this->apiKey = sha1($data['session']['token'] . $this->apiSecret);
-            return $data['session'];
-        } else {
-            throw new Eazymatch_Error('Invalid credentials');
-        }
-
+    public function setToken($token)
+    {
+        $this->apiToken = hash('sha256', $token . $this->apiSecret);
     }
 
     /**
-     * Post request to Eazymatch.io
+     * Post request to Eazymatch
      *
      * @param $endpoint
      * @param array $params
      * @return mixed
      */
-    public function post($endpoint, $params = [])
+    public function call($endpoint, $params = [])
     {
-
         try {
-            $response = $this->client->request('POST', $this->root . $endpoint, [
+            // collect post variables for service
+            $fieldData = [];
+            if (!empty($params)) {
+                $argumentCounter = -1;
+                foreach ($params as $argument) {
+                    $argumentCounter++;
+                    $fieldData['argument[' . $argumentCounter . ']'] = $argument;
+                }
+            }
+
+            $fieldData['instance'] = $this->instance;
+            if (!is_null($this->apiToken)) {
+                $fieldData['key'] = $this->apiToken;
+            } else {
+                $fieldData['key'] = $this->apiKey;
+            }
+
+            $response = $this->client->request('POST', $this->root . $endpoint . '.json', [
                 'headers' => [
-                    'X-Authorization' => $this->apiKey,
-                    'X-Customer' => $this->customer,
+                    'Content-Type' => 'application/x-www-form-urlencoded',
                     'X-response-type' => 'json',
-                    'Content-Type' => 'application/json',
                 ],
-                'decode_content' => true,
-                'verify' => false,
-                'body' => json_encode($params)
-            ]);
-
-        } catch (Eazymatch_HttpError $error) {
-            return [
-                'code' => $error->getCode(),
-                'message' => $error->getMessage()
-            ];
-        }
-
-        $body = json_decode($response->getBody(), true);
-        return $body;
-    }
-
-    /**
-     * Post request to Eazymatch.io
-     *
-     * @param $endpoint
-     * @return mixed
-     */
-    public function get($endpoint)
-    {
-
-        try {
-            $response = $this->client->request('GET', $this->root . $endpoint, [
-                'headers' => [
-                    'X-Authorization' => $this->apiKey,
-                    'X-Customer' => $this->customer,
-                    'X-response-type' => 'json',
-                    'Content-Type' => 'application/json',
-                ],
-                'decode_content' => true,
-                'verify' => false
-            ]);
-
-        } catch (Eazymatch_HttpError $error) {
-            return [
-                'code' => $error->getCode(),
-                'message' => $error->getMessage()
-            ];
-        }
-
-        $body = json_decode($response->getBody(), true);
-        return $body;
-    }
-
-    /**
-     * Put request to Eazymatch.io
-     *
-     * @param $endpoint
-     * @return mixed
-     */
-    public function put($endpoint)
-    {
-
-        try {
-            $response = $this->client->request('PUT', $this->root . $endpoint, [
-                'headers' => [
-                    'X-Authorization' => $this->apiKey,
-                    'X-Customer' => $this->customer,
-                    'X-response-type' => 'json',
-                    'Content-Type' => 'application/json',
-                ],
-                'decode_content' => true,
-                'verify' => false
-            ]);
-
-        } catch (Eazymatch_HttpError $error) {
-            return [
-                'code' => $error->getCode(),
-                'message' => $error->getMessage()
-            ];
-        }
-
-        $body = json_decode($response->getBody(), true);
-        return $body;
-    }
-
-    /**
-     * Put request to Eazymatch.io
-     *
-     * @param $endpoint
-     * @return mixed
-     */
-    public function del($endpoint)
-    {
-
-        try {
-            $response = $this->client->request('DELETE', $this->root . $endpoint, [
-                'headers' => [
-                    'X-Authorization' => $this->apiKey,
-                    'X-Customer' => $this->customer,
-                    'X-response-type' => 'json',
-                    'Content-Type' => 'application/json',
-                ],
+                'form_params' => $fieldData,
                 'decode_content' => true,
                 'verify' => false
             ]);
