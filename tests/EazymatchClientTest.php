@@ -17,7 +17,7 @@ class theTest extends \PHPUnit_Framework_TestCase
             $key,
             $secret,
             'klantnaam',
-            'https://api.eazymatch.local'
+            'https://core.eazymatch.net'
         );
 
         if (!empty($tt)) {

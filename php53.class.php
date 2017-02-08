@@ -1,4 +1,5 @@
 <?php
+
 /**
  * To use with websites on PHP < 5.3
  *
@@ -85,9 +86,10 @@ class EazymatchClient
             $argumentCounter = -1;
             foreach ($params as $argument) {
                 $argumentCounter++;
-                $fieldData['argument[' . $argumentCounter . ']'] = $argument;
+                $fieldData['argument[' . $argumentCounter . ']'] = json_encode($argument);
             }
         }
+
 
         $fieldData['instance'] = $this->instance;
         if (!is_null($this->apiToken)) {
@@ -110,12 +112,11 @@ class EazymatchClient
 
             // add post functionality
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $fieldData,
+            CURLOPT_POSTFIELDS => http_build_query($fieldData),
 
             // optimize connection
-            CURLOPT_DNS_CACHE_TIMEOUT => 1800, // cache dns requests 30 minutes ( default = 2 )
-            CURLOPT_CONNECTTIMEOUT => 119,
-            CURLOPT_TIMEOUT => 120,
+            CURLOPT_CONNECTTIMEOUT => 0,
+            CURLOPT_TIMEOUT => 400,
 
             // force returning the result into an variable
             CURLOPT_RETURNTRANSFER => true
@@ -125,6 +126,7 @@ class EazymatchClient
         $apiResponse = curl_exec($ch);
 
         $body = json_decode($apiResponse, true);
+
         return $body;
     }
 }
