@@ -66,6 +66,11 @@ class EazymatchClient
         $this->apiToken = hash('sha256', $token . $this->apiSecret);
     }
 
+    public function getToken()
+    {
+        return $this->apiToken;
+    }
+
     /**
      * Post request to Eazymatch
      *
