@@ -46,7 +46,7 @@ class EazymatchClient
         if($resetKey === true){
             $this->resetKey();
         } else {
-            $this->setToken($apikey);
+            $this->apiToken = $apikey;
         }
 
     }
