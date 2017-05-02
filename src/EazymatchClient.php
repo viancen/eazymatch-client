@@ -26,7 +26,7 @@ class EazymatchClient
      * @param null $root
      * @param array $options
      */
-    public function __construct($apikey = '', $apiSecret = '', $customer = null, $root = null)
+    public function __construct($apikey = '', $apiSecret = '', $customer = null, $root = null, $resetKey=true)
     {
         if (!$apikey) throw new Eazymatch_Error('You must provide a Eazymatch API key');
         if (!$apiSecret) throw new Eazymatch_Error('You must provide a Eazymatch API secret');
@@ -43,7 +43,11 @@ class EazymatchClient
         $this->root = rtrim($this->root, '/') . '/';
 
         //setup connection
-        $this->resetKey();
+        if($resetKey === true){
+            $this->resetKey();
+        } else {
+            $this->setToken($apikey);
+        }
 
     }
 

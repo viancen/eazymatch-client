@@ -7,7 +7,7 @@
  *
  * Class EazymatchClient
  */
-class EazymatchClient
+class Eazymatch53Client
 {
     //token
     var $apiToken;
@@ -27,9 +27,9 @@ class EazymatchClient
      * @param null $apiSecret
      * @param null $customer
      * @param null $root
-     * @param array $options
+     * @param array $reset
      */
-    public function __construct($apikey = '', $apiSecret = '', $customer = null, $root = null)
+    public function __construct($apikey = '', $apiSecret = '', $customer = null, $root = null, $reset = true)
     {
         if (!$apikey) die('You must provide a Eazymatch API key');
         if (!$apiSecret) die('You must provide a Eazymatch API secret');
@@ -38,7 +38,7 @@ class EazymatchClient
             $root = 'https://core.eazymatch.net/v1/';
         }
 
-
+        //setup variables
         $this->apiKey = $apikey;
         $this->root = $root;
         $this->apiSecret = $apiSecret;
@@ -47,7 +47,11 @@ class EazymatchClient
         $this->root = rtrim($this->root, '/') . '/';
 
         //setup connection
-        $this->resetKey();
+        if (!$reset) {
+            $this->setToken($apikey);
+        } else {
+            $this->resetKey();
+        }
 
     }
 
