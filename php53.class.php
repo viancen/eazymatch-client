@@ -35,7 +35,7 @@ class Eazymatch53Client
         if (!$apiSecret) die('You must provide a Eazymatch API secret');
         if (!$customer) die('You must provide a Eazymatch customer slug');
         if (!$root) {
-            $root = 'https://core.eazymatch.net/v1/';
+            $root = 'https://api.eazymatch.cloud/v1/';
         }
 
         //setup variables

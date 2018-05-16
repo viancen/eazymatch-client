@@ -32,7 +32,7 @@ class EazymatchClient
         if (!$apiSecret) throw new Eazymatch_Error('You must provide a Eazymatch API secret');
         if (!$customer) throw new Eazymatch_Error('You must provide a Eazymatch customer slug');
         if (!$root) {
-            $root = 'https://core.eazymatch.net/v1/';
+            $root = 'https://api.eazymatch.cloud/v1/';
         }
 
         $this->apiKey = $apikey;
